@@ -1875,13 +1875,14 @@ class Pendulum(Date, datetime.datetime):
         if isinstance(value, Pendulum):
             return value._datetime if not pendulum else value
 
-        if isinstance(value, datetime.datetime):
+        if hasattr(value, 'tzinfo'):
             if value.tzinfo is None:
                 value = self._tz.convert(value)
-
             return value if not pendulum else Pendulum.instance(value)
-
-        raise ValueError('Invalid datetime "{}"'.format(value))
+        try:
+            return value._datetime if not pendulum else Pendulum.instance(value)
+        except AttributeError:
+            raise ValueError('Invalid datetime "{}"'.format(value))
 
     def __sub__(self, other):
         if isinstance(other, datetime.timedelta):
